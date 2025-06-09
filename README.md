@@ -15,7 +15,7 @@ Penelitian ini bertujuan untuk memodelkan perjalanan pelanggan melalui berbagai 
 ├── notebooks/
 │   └── analisis_churn.ipynb      (Kode utama analisis dalam Jupyter Notebook)
 ├── output/
-│   └── (Folder untuk menyimpan plot dan hasil)
+│   └── plot_distribusi_status.png
 ├── .gitignore
 ├── LICENSE
 ├── README.md
@@ -28,8 +28,7 @@ Untuk menjalankan analisis ini di mesin lokal Anda, ikuti langkah-langkah beriku
 
 1.  **Clone repositori ini:**
     ```bash
-    git clone [https://github.com/zakizulham/proyek-stokastik-churn-telekomunikasi](https://github.com/zakizulham/proyek-stokastik-churn-telekomunikasi)
-    cd proyek-stokastik-churn-telekomunikasi
+    git clone https://github.com/zakizulham/proyek-stokastik-churn-telekomunikasi.git && cd proyek-stokastik-churn-telekomunikasi
     ```
 
 2.  **Buat dan aktifkan Virtual Environment (Direkomendasikan):**
@@ -45,6 +44,8 @@ Untuk menjalankan analisis ini di mesin lokal Anda, ikuti langkah-langkah beriku
     ```
 
 3.  **Instal pustaka yang dibutuhkan:**
+    Menggunakan Python 3.13.2
+    Pustaka yang dibutuhkan:
     ```bash
     pip install -r requirements.txt
     ```
