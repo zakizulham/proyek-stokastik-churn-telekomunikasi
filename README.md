@@ -4,10 +4,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-no-red.svg)](https://github.com/stevenrhart/predicting-claims/graphs/commit-activity)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-
 Repositori ini berisi kode dan data untuk proyek akhir mata kuliah Proses Stokastik, yang mengimplementasikan model Rantai Markov Waktu Diskrit (DTMC) untuk menganalisis dan memprediksi *customer churn* pada industri telekomunikasi.
-
-Konten Repository
 
 **[Deskripsi](#Deskripsi)** | **[Struktur Repository](#Struktur)** | **[Reproduksi Hasil](#Reproduksi)** | **[Ringkasan Proyek](#Ringkasan)** | **[Lisensi](#Lisensi)** 
 
