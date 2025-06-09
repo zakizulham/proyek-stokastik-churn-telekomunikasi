@@ -65,7 +65,9 @@ Untuk menjalankan analisis ini di mesin lokal Anda, ikuti langkah-langkah beriku
 
 ## Hasil Utama
 
-Analisis menunjukkan bahwa pelanggan pada fase **`New` (1-12 bulan)** memiliki risiko churn bulanan tertinggi secara signifikan. Model DTMC memprediksi bahwa pelanggan baru memiliki probabilitas kumulatif untuk churn yang tinggi dalam 1-2 tahun pertama, yang menekankan pentingnya strategi retensi yang tertarget pada fase awal siklus hidup pelanggan.
+Analisis dari model DTMC mengungkapkan sebuah fenomena churn yang **sangat dominan dan terjadi dengan cepat** pada pelanggan di fase **`New` (1-12 bulan)**. Berbeda dengan pandangan umum tentang churn yang terjadi secara bertahap, model ini memprediksi bahwa eksodus pelanggan terjadi secara masif **dalam beberapa bulan pertama saja**.
+
+Temuan krusial lainnya adalah probabilitas seorang pelanggan baru untuk berhasil "lulus" ke fase `Established` atau `Loyal` sangatlah kecil. Model menunjukkan bahwa hampir semua pelanggan baru dihadapkan pada dua takdir dalam jangka pendek: churn, atau dengan probabilitas yang jauh lebih kecil, tetap berjuang di fase awal. Hal ini mengimplikasikan bahwa jendela kesempatan untuk melakukan retensi sangatlah sempit, dan intervensi harus dilakukan secara **agresif dan sangat dini** dalam siklus hidup pelanggan untuk dapat memberikan dampak yang berarti.
 
 ## Lisensi
 
