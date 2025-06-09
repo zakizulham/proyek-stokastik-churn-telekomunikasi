@@ -9,7 +9,7 @@
 
 \title{
 \bf Analisis Siklus Hidup Pelanggan dan Prediksi Churn Menggunakan Model Rantai Markov Waktu Diskrit \\
-\vspace{0.5em}
+\vspace{0.5em}\\
 \large Kelompok 4
 }
 \author{
@@ -21,7 +21,7 @@ Joshua Novandri \\
 \small Ilmu Aktuaria \\
 \small joshua.novandri@ui.ac.id
 \and
-Stephanie Febriana \\
+Stephanie Febriana E\\
 \small Ilmu Aktuaria \\
 \small stephaniefebriana@sci.ui.ac.id
 \and
@@ -33,9 +33,9 @@ Devina Vanessa H \\
 \small Ilmu Aktuaria \\
 \small devina.vanessa@ui.ac.id
 }
-\date{}
 
 \renewcommand{\abstractname}{Abstrak}
+
 \begin{document}
 
 \maketitle
@@ -104,7 +104,7 @@ Penelitian ini menggunakan data sekunder yang bersumber dari dataset publik \tex
 Untuk memodelkan perjalanan pelanggan, ruang keadaan \textit{(state space)} $\mathcal{S}$ didefinisikan berdasarkan fase siklus hidup pelanggan. Model ini memiliki empat status:
 \begin{enumerate}
     \item \textbf{State 1: New (Baru):} Pelanggan dengan masa berlangganan (tenure) 1–12 bulan.
-    \item \textbf{State 2: Established (tetap):} Pelanggan dengan \textit{tenure} 13–48 bulan.
+    \item \textbf{State 2: Established (Tetap):} Pelanggan dengan \textit{tenure} 13–48 bulan.
     \item \textbf{State 3: Loyal (Setia):} Pelanggan dengan \textit{tenure} lebih dari 48 bulan.
     \item \textbf{State 4: Churn (Berhenti):} Status penyerap (\textit{absorbing state}) bagi pelanggan yang telah berhenti berlangganan.
 \end{enumerate}
@@ -142,7 +142,7 @@ Distribusi probabilitas status setelah $n$ langkah (bulan) dapat dihitung dengan
 di mana $\pi^{(n)}$ adalah vektor baris distribusi status pada waktu ke-$n$ dan $\pi^{(0)}$ adalah distribusi status awal.
 
 \subsection{Metode Analisis}
-Analisis data dan implementasi model dilakukan menggunakan perangkat lunak \textbf{Python} versi 3.x dengan memanfaatkan pustaka \textit{(libraries)} utama sebagai berikut:
+Analisis data dan implementasi model dilakukan menggunakan perangkat lunak \textbf{Python} versi 3.13 dengan memanfaatkan pustaka \textit{(libraries)} utama sebagai berikut:
 \begin{itemize}
     \item \textbf{Pandas:} Digunakan untuk memanipulasi data, membersihkan, serta melakukan pra-pemrosesan seperti membuat kategori `tenure` untuk mendefinisikan status pelanggan.
     \item \textbf{NumPy:} Digunakan untuk komputasi numerik, khususnya dalam membuat dan melakukan operasi aljabar linear pada matriks transisi, seperti perpangkatan matriks ($P^n$).
