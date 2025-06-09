@@ -11,15 +11,19 @@ Penelitian ini bertujuan untuk memodelkan perjalanan pelanggan melalui berbagai 
 ```
 .
 ├── data/
-│   └── Telco-Customer-Churn.csv  (Dataset mentah)
+│   └── Telco-Customer-Churn.csv
+├── laporan/
+│   ├── analisis_churn.pdf
+│   ├── main.tex
+│   └── references.bib
 ├── notebooks/
-│   └── analisis_churn.ipynb      (Kode utama analisis dalam Jupyter Notebook)
+│   └── analisis_churn.ipynb      
 ├── output/
 │   └── plot_distribusi_status.png
 ├── .gitignore
 ├── LICENSE
 ├── README.md
-└── requirements.txt            (Daftar pustaka Python yang dibutuhkan)
+└── requirements.txt
 ```
 
 ## Cara Reproduksi Hasil
