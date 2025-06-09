@@ -44,8 +44,11 @@ Untuk menjalankan analisis ini di mesin lokal Anda, ikuti langkah-langkah beriku
     ```
 
 3.  **Instal pustaka yang dibutuhkan:**
+
     Menggunakan Python 3.13.2
+
     Pustaka yang dibutuhkan:
+
     ```bash
     pip install -r requirements.txt
     ```
