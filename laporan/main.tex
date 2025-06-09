@@ -1,0 +1,261 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{natbib}
+\geometry{margin=2.5cm}
+
+\title{
+\bf Analisis Siklus Hidup Pelanggan dan Prediksi Churn Menggunakan Model Rantai Markov Waktu Diskrit \\
+\vspace{0.5em}
+\large Kelompok 4
+}
+\author{
+Muhammad Zaki Z \\
+\small Ilmu Aktuaria \\
+\small muhammad.zaki22@ui.ac.id
+\and
+Joshua Novandri \\
+\small Ilmu Aktuaria \\
+\small joshua.novandri@ui.ac.id
+\and
+Stephanie Febriana \\
+\small Ilmu Aktuaria \\
+\small stephaniefebriana@sci.ui.ac.id
+\and
+Andi Rizqy Ariqah \\
+\small Ilmu Aktuaria \\
+\small andi.rizqy@ui.ac.id
+\and
+Devina Vanessa H \\
+\small Ilmu Aktuaria \\
+\small devina.vanessa@ui.ac.id
+}
+\date{}
+
+\renewcommand{\abstractname}{Abstrak}
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Retensi pelanggan merupakan tantangan krusial dalam industri telekomunikasi yang kompetitif. Model prediksi \textit{churn} konvensional sering kali gagal menangkap dinamika perilaku pelanggan yang berubah seiring waktu. Penelitian ini mengusulkan dan mengimplementasikan model Rantai Markov Waktu Diskrit (DTMC) \textit{multi-state} untuk memodelkan perjalanan atau siklus hidup pelanggan secara lebih granurel. Dengan menggunakan dataset publik \textit{Telco Customer Churn}, pelanggan diklasifikasikan ke dalam empat status: 'New' ($1-12$ bulan), 'Established' ($13-48$ bulan), 'Loyal' ($>48$ bulan), dan 'Churn' sebagai status penyerap. Dari data tersebut, matriks probabilitas transisi bulanan berhasil diestimasi. Hasil utama menunjukkan bahwa pelanggan pada fase 'New' memiliki risiko \textit{churn} tertinggi secara signifikan ($\approx 47.68\%$ per bulan), sementara pelanggan 'Loyal' menunjukkan inersia yang sangat tinggi untuk bertahan ($\approx86.72\%$ per bulan). Analisis jangka panjang menggunakan perpangkatan matriks memprediksi bahwa seorang pelanggan baru memiliki probabilitas kumulatif untuk \textit{churn} yang dapat mencapai lebih dari $(\approx95.83\%)$ dalam 6 bulan pertama dan meningkat hingga $(\approx99.96\%)$ setelah tiga tahun. Model ini membuktikan bahwa pendekatan berbasis siklus hidup tidak hanya mampu mengidentifikasi segmen pelanggan paling rentan, tetapi juga memberikan wawasan kuantitatif untuk perancangan strategi retensi yang lebih efektif dan tertarget.
+\end{abstract}
+
+
+\noindent\textbf{Keywords:} \textit{Churn} Pelanggan, Proses Stokastik, Rantai Markov Waktu Diskrit, Siklus Hidup Pelanggan, Telekomunikasi.
+
+
+\section{Pendahuluan}
+
+\subsection{Latar Belakang Masalah}
+Industri telekomunikasi modern ditandai oleh tingkat persaingan yang sangat tinggi, di mana biaya untuk mengakuisisi pelanggan baru seringkali jauh lebih besar daripada biaya untuk mempertahankan pelanggan yang sudah ada. Oleh karena itu, retensi pelanggan menjadi faktor krusial bagi profitabilitas dan keberlanjutan bisnis perusahaan. Fenomena pelanggan yang berhenti berlangganan, atau dikenal sebagai \textit{customer churn}, merupakan tantangan utama yang dihadapi industri ini. Memahami dinamika di balik keputusan pelanggan untuk \textit{churn} adalah kunci untuk merancang strategi retensi yang efektif.
+
+Perilaku pelanggan tidaklah homogen; seorang pelanggan yang baru berlangganan selama dua bulan memiliki karakteristik dan risiko churn yang berbeda secara signifikan dibandingkan pelanggan yang telah setia selama lima tahun. Namun, banyak model prediksi \textit{churn} memperlakukan semua pelanggan secara seragam, sehingga kehilangan wawasan penting terkait siklus hidup (\textit{lifecycle}) pelanggan. Proses stokastik, khususnya Rantai Markov Waktu Diskrit (DTMC), menyediakan kerangka kerja matematis yang kuat untuk memodelkan sistem yang bertransisi antar status dari waktu ke waktu dalam kondisi ketidakpastian \citep{ross2014introduction}. Berangkat dari \citep{pfeifer2002customer} dengan mendefinisikan status berdasarkan fase \textit{lifecycle} pelanggan, DTMC memungkinkan kita untuk memetakan dan menganalisis perjalanan pelanggan secara lebih granurel \citep{grimmett2001probability} dan dinamis \citep{gusev2019markov}.
+
+\subsection{Rumusan Masalah}
+Penelitian ini berfokus pada penerapan model DTMC untuk menganalisis \textit{lifecycle} pelanggan telekomunikasi. Berdasarkan latar belakang tersebut, rumusan masalah yang hendak dijawab adalah sebagai berikut:
+\begin{itemize}
+    \item Bagaimana cara memodelkan perjalanan pelanggan telekomunikasi melalui berbagai fase loyalitas \textit{(New, Established, Loyal)} hingga berhenti berlangganan \textit{(Churn)} menggunakan Rantai Markov Waktu Diskrit?
+    \item Berapakah estimasi probabilitas transisi bulanan bagi seorang pelanggan untuk berpindah antar fase loyalitas atau menuju status \textit{Churn}?
+    \item Bagaimana perbedaan risiko \textit{churn} pada setiap fase \textit{lifecycle} pelanggan, dan fase manakah yang memiliki risiko tertinggi?
+    \item Berapakah ekspektasi rata-rata masa berlangganan \textit{(customer lifetime)} seorang pelanggan berdasarkan fase loyalitas mulanya?
+\end{itemize}
+
+\subsection{Tujuan Penelitian}
+Sejalan dengan rumusan masalah, tujuan dari penelitian ini adalah:
+\begin{itemize}
+    \item Mengembangkan model Rantai Markov Waktu Diskrit (DTMC) \textit{multi-state} yang merepresentasikan siklus hidup pelanggan telekomunikasi.
+    \item Mengestimasi matriks probabilitas transisi bulanan dari model tersebut menggunakan dataset publik \textit{Telco Customer Churn}.
+    \item Menganalisis dinamika \textit{churn} dengan mengidentifikasi fase-fase paling kritis dalam perjalanan pelanggan.
+    \item Menghitung metrik bisnis strategis, seperti probabilitas retensi jangka panjang dan ekspektasi masa berlangganan pelanggan berdasarkan fase loyalitas mulanya, sebagai hasil dari analisis model.
+\end{itemize}
+
+\subsection{Manfaat Penelitian}
+Hasil dari penelitian ini diharapkan dapat memberikan manfaat sebagai berikut:
+\begin{itemize}
+    \item \textbf{Manfaat Praktis/Industri:} Menyediakan sebuah model kuantitatif bagi perusahaan telekomunikasi untuk memahami perilaku pelanggan secara lebih mendalam. Wawasan yang dihasilkan dari model ini dapat menjadi dasar untuk merancang strategi retensi yang lebih tertarget dan efisien, misalnya dengan memfokuskan sumber daya pada pelanggan di fase yang paling berisiko terhadap \textit{churn}.
+    \item \textbf{Manfaat Akademis/Teoritis:} Menjadi studi kasus nyata penerapan teori proses stokastik, khususnya DTMC, pada permasalahan bisnis. Penelitian ini menunjukkan bagaimana konsep-konsep teoretis seperti matriks transisi dan state penyerap dapat diimplementasikan untuk menghasilkan wawasan yang dapat ditindaklanjuti secara praktis.
+\end{itemize}
+
+\subsection{Batasan Masalah}
+Untuk menjaga fokus penelitian, terdapat beberapa batasan masalah yang ditetapkan:
+\begin{itemize}
+    \item Penelitian ini menggunakan dataset \textit{snapshot} (cross-sectional), sehingga transisi antar status bersifat inferensi (disimpulkan), bukan observasi langsung dari data panel.
+    \item Probabilitas transisi diasumsikan konstan untuk semua pelanggan di dalam satu grup \textit{lifecycle} yang sama.
+    \item Model tidak memperhitungkan faktor eksternal lain yang dapat mempengaruhi \textit{churn}, seperti kampanye pemasaran, perubahan harga dari kompetitor, atau kondisi ekonomi makro.
+    \item Batasan fase \textit{lifecycle} (1-12 bulan, 13-48 bulan, $> 48$ bulan) didefinisikan untuk keperluan studi ini dan dapat disesuaikan pada penelitian selanjutnya.
+\end{itemize}
+
+Fenomena stokastik muncul dalam berbagai bidang, seperti antrian layanan, telekomunikasi, dan sistem biologis \citep{ross2014introduction}. Studi ini bertujuan untuk mengimplementasikan model stokastik yang sesuai dalam memodelkan suatu masalah riil, serta menganalisis karakteristik dan hasil simulasi model tersebut.
+
+\section{Metodologi}
+Metodologi penelitian ini disusun untuk memastikan implementasi model stokastik yang sistematis dan dapat direproduksi. Tahapan metodologi mencakup deskripsi dan pemilihan model, definisi ruang keadaan dan parameter, formulasi matematis, serta metode analisis data.
+
+\subsection{Deskripsi Model}
+Model stokastik yang digunakan dalam penelitian ini adalah \textbf{Rantai Markov Waktu Diskrit (Discrete-Time Markov Chain, DTMC)}. Model ini dipilih karena kemampuannya yang sangat baik dalam merepresentasikan sistem yang bertransisi di antara serangkaian status yang berbeda pada interval waktu yang diskrit (yaitu, dari bulan ke bulan). Karakteristik utama yang mendasari DTMC adalah \textbf{Sifat Markov (Markov Property)}, yang menyatakan bahwa probabilitas transisi ke status berikutnya hanya bergantung pada status saat ini, dan tidak pada urutan status yang mendahuluinya. Properti ini sangat sesuai untuk memodelkan \textit{churn} pelanggan, di mana keputusan pelanggan di masa depan dapat diasumsikan sangat dipengaruhi oleh fase loyalitas mereka saat ini.
+
+\subsection{Pengumpulan Data}
+Penelitian ini menggunakan data sekunder yang bersumber dari dataset publik \textbf{“Telco Customer Churn”} yang tersedia di platform \textit{Kaggle} \citep{kaggle_telco_churn}. Dataset ini berisi 7.043 data pelanggan dengan 21 atribut, yang mencakup informasi demografis, layanan yang digunakan (telepon, internet, TV streaming, dll.), detail kontrak, serta status \textit{churn} pelanggan. Atribut kunci yang menjadi dasar pembentukan status dalam model ini adalah `tenure`, yang merepresentasikan jumlah bulan pelanggan telah berlangganan.
+
+\subsection{Definisi Ruang Keadaan dan Parameter}
+Untuk memodelkan perjalanan pelanggan, ruang keadaan \textit{(state space)} $\mathcal{S}$ didefinisikan berdasarkan fase siklus hidup pelanggan. Model ini memiliki empat status:
+\begin{enumerate}
+    \item \textbf{State 1: New (Baru):} Pelanggan dengan masa berlangganan (tenure) 1–12 bulan.
+    \item \textbf{State 2: Established (tetap):} Pelanggan dengan \textit{tenure} 13–48 bulan.
+    \item \textbf{State 3: Loyal (Setia):} Pelanggan dengan \textit{tenure} lebih dari 48 bulan.
+    \item \textbf{State 4: Churn (Berhenti):} Status penyerap (\textit{absorbing state}) bagi pelanggan yang telah berhenti berlangganan.
+\end{enumerate}
+Parameter utama model adalah probabilitas transisi bulanan $p_{ij}$, yang menyatakan probabilitas berpindah dari status $i$ ke status $j$ dalam satu bulan. Asumsi yang digunakan adalah probabilitas transisi ini stasioner (tidak berubah seiring waktu) untuk setiap kelompok status.
+
+\subsection{Formulasi Matematis}
+Probabilitas transisi satu langkah dari status $i$ ke status $j$ didefinisikan sebagai:
+\[ p_{ij} = P(X_{n+1} = j | X_n = i) \]
+di mana $X_n$ adalah status sistem pada waktu (bulan) ke-$n$. Seluruh probabilitas ini dirangkum dalam sebuah Matriks Probabilitas Transisi (P) berukuran $4 \times 4$:
+\[
+P = \begin{pmatrix}
+p_{11} & p_{12} & p_{13} & p_{14} \\
+p_{21} & p_{22} & p_{23} & p_{24} \\
+p_{31} & p_{32} & p_{33} & p_{34} \\
+p_{41} & p_{42} & p_{43} & p_{44}
+\end{pmatrix}
+=
+\begin{pmatrix}
+p_{\text{New} \to \text{New}} & p_{\text{New} \to \text{Est}} & p_{\text{New} \to \text{Loyal}} & p_{\text{New} \to \text{Churn}} \\
+p_{\text{Est} \to \text{New}} & p_{\text{Est} \to \text{Est}} & p_{\text{Est} \to \text{Loyal}} & p_{\text{Est} \to \text{Churn}} \\
+p_{\text{Loyal} \to \text{New}} & p_{\text{Loyal} \to \text{Est}} & p_{\text{Loyal} \to \text{Loyal}} & p_{\text{Loyal} \to \text{Churn}} \\
+p_{\text{Churn} \to \text{New}} & p_{\text{Churn} \to \text{Est}} & p_{\text{Churn} \to \text{Loyal}} & p_{\text{Churn} \to \text{Churn}}
+\end{pmatrix}
+\]
+Elemen matriks $p_{ij}$ diestimasi dari data. Misalkan $c_i$ adalah rasio \textit{churn} empiris pada grup status $i$ dan $d_i$ adalah durasi (dalam bulan) dari status transient $i$. Maka:
+\begin{itemize}
+    \item Probabilitas \textit{Churn}: $p_{i,4} = c_i$
+    \item Probabilitas Bertahan dan Lulus ke Status Berikutnya: $p_{i,i+1} = \frac{1}{d_i} \times (1 - c_i)$
+    \item Probabilitas Bertahan dan Tetap di Status yang Sama: $p_{ii} = \frac{d_i - 1}{d_i} \times (1 - c_i)$
+    \item Untuk state penyerap \textit{Churn} (status 4): $p_{44} = 1$ dan $p_{4j} = 0$ untuk $j \neq 4$.
+    \item Probabilitas transisi lainnya yang tidak mungkin (misal, dari `Established` ke `New`) bernilai 0.
+\end{itemize}
+Distribusi probabilitas status setelah $n$ langkah (bulan) dapat dihitung dengan persamaan:
+\[ \pi^{(n)} = \pi^{(0)} P^n \]
+di mana $\pi^{(n)}$ adalah vektor baris distribusi status pada waktu ke-$n$ dan $\pi^{(0)}$ adalah distribusi status awal.
+
+\subsection{Metode Analisis}
+Analisis data dan implementasi model dilakukan menggunakan perangkat lunak \textbf{Python} versi 3.x dengan memanfaatkan pustaka \textit{(libraries)} utama sebagai berikut:
+\begin{itemize}
+    \item \textbf{Pandas:} Digunakan untuk memanipulasi data, membersihkan, serta melakukan pra-pemrosesan seperti membuat kategori `tenure` untuk mendefinisikan status pelanggan.
+    \item \textbf{NumPy:} Digunakan untuk komputasi numerik, khususnya dalam membuat dan melakukan operasi aljabar linear pada matriks transisi, seperti perpangkatan matriks ($P^n$).
+\end{itemize}
+Proses analisis meliputi estimasi parameter $p_{ij}$ dari data, pembentukan matriks P, dan analisis perilaku jangka panjang dengan menghitung perpangkatan matriks untuk memprediksi distribusi pelanggan di masa depan.
+
+\section{Hasil dan Pembahasan}
+Pada bagian ini, disajikan hasil analisis dari model Rantai Markov Waktu Diskrit (DTMC) \textit{lifecycle} pelanggan yang telah dikembangkan. Pembahasan difokuskan pada interpretasi matriks transisi, analisis perilaku jangka panjang, serta diskusi mengenai kekuatan dan keterbatasan model yang digunakan.
+
+\subsection{Matriks Transisi dan Risiko Churn per Fase}
+Estimasi parameter dari dataset menghasilkan Matriks Probabilitas Transisi (P) bulanan sebagai berikut, yang merangkum seluruh dinamika perpindahan pelanggan antar status.
+
+\begin{table}[ht]
+\centering
+\caption{Matriks Probabilitas Transisi Bulanan (P)}
+\label{tab:transition_matrix}
+\begin{tabular}{l|cccc}
+\hline
+\textbf{\small{Dari}} & \textbf{New} & \textbf{Established} & \textbf{Loyal} & \textbf{Churn} \\
+\hline
+\textbf{New} & $0.4796$ & $0.0436$ & 0.000 & $0.4768$ \\
+\textbf{Established} & 0.000 & $0.7423$ & $0.0212$ & $0.2364$ \\
+\textbf{Loyal} & 0.000 & 0.000 & $0.8672$ & $0.0951$ \\
+\textbf{Churn} & 0.000 & 0.000 & 0.000 & $1.000$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Interpretasi Hasil}
+Matriks pada Tabel \ref{tab:transition_matrix} memberikan wawasan kuantitatif mengenai perilaku pelanggan di setiap fase:
+\begin{itemize}
+    \item \textbf{Risiko Churn Tertinggi pada Fase Awal:} Probabilitas seorang pelanggan `New` untuk \textit{churn} dalam satu bulan ($p_{14}$) adalah sebesar $47.68\%$. Angka ini secara signifikan lebih tinggi dibandingkan pelanggan `Established` ($23.64\%$) dan `Loyal` ($9.51\%$). Hal ini secara kuantitatif memvalidasi hipotesis bahwa pelanggan baru adalah segmen yang paling rentan dan memerlukan perhatian retensi khusus.
+    \item \textbf{Inersia Pelanggan Setia:} Pelanggan pada fase `Loyal` memiliki probabilitas yang tinggi untuk tetap loyal ($p_{33}$ = 86.72\%). Hal ini menunjukkan tingkat inersia yang besar dan mencerminkan keberhasilan perusahaan dalam mempertahankan segmen ini.
+    \item \textbf{Transisi Kelulusan:} Probabilitas seorang pelanggan `New` untuk bertahan dan `lulus` atau berubah status menjadi `Established` ($p_{12}$) adalah sebesar 4.36\%. Angka ini menandakan bahwa sebagian besar pelanggan baru tidak bertahan dalam waktu yang lama untuk berpindah ke fase berikutnya. Hal ini dapat menjadi indikator bahwa efektivitas proses \textit{onboarding} pelanggan perlu ditingkatkan.
+    \item \textbf{Sifat State Penyerap:} Baris terakhir matriks menunjukkan bahwa status `Churn` merupakan state penyerap. Artinya, setelah seorang pelanggan berhenti berlangganan, mereka tidak akan kembali ke status aktif. Hal ini sejalan dengan teori rantai Markov, dimana semua pelanggan pada akhirnya akan terserap ke status \textit{churn} ($p_{44}=1$). 
+\end{itemize}
+    
+\subsection{Analisis Perilaku Jangka Panjang}
+Untuk memahami evolusi kohort pelanggan dari waktu ke waktu, dilakukan perhitungan perpangkatan matriks transisi ($P^n$). Tabel \ref{tab:pn_results} menunjukkan distribusi probabilitas seorang pelanggan yang \textbf{awalnya `New`} akan berada di setiap status setelah 6, 12, 18, 24, 30, dan 36 bulan.
+
+\begin{table}[h]
+\centering
+\caption{Distribusi Probabilitas Status Pelanggan Baru Setelah n Bulan}
+\label{tab:pn_results}
+\begin{tabular}{l|cccc}
+\hline
+\textbf{n Bulan} & \textbf{P(di New)} & \textbf{P(di Est.)} & \textbf{P(di Loyal)} & \textbf{P(di Churn)} \\
+\hline
+\textbf{6} & 0.0122 & 0.0258 & 0.0038 & 0.9583 \\
+\textbf{12} & 0.0001 & 0.0046 & 0.0034 & 0.9918 \\
+\textbf{18} & 0.0000 & 0.0008 & 0.0021 & 0.9971 \\
+\textbf{24} & 0.0000 & 0.0001 & 0.0012 & 0.9987 \\
+\textbf{30} & 0.0000 & 0.0000 & 0.0007 & 0.9993 \\
+\textbf{36} & 0.0000 & 0.0000 & 0.0004 & 0.9996 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Interpretasi dan Perbandingan dengan Teori}
+Hasil simulasi jangka panjang ini sepenuhnya konsisten dengan teori rantai Markov yang memiliki state penyerap \citep{norris1998markov}.
+\begin{itemize}
+    \item \textbf{Probabilitas Churn Kumulatif:} Dapat dilihat bahwa probabilitas kumulatif seorang pelanggan baru untuk telah churn meningkat seiring waktu, dari $95.8\%$ setelah 6 bulan menjadi $99.9\%$ setelah 3 tahun. Angka ini memberikan gambaran realistis mengenai tingkat retensi jangka panjang.
+    \item \textbf{Konvergensi ke State Penyerap:} Seiring dengan $n \to \infty$, probabilitas pelanggan berada di state transient (`New`, `Established`, `Loyal`) akan menuju nol, dan probabilitas berada di state `Churn` akan menuju 1. Ini adalah perilaku fundamental dari rantai Markov ireduksibel dengan state penyerap, di mana semua individu pada akhirnya akan terserap.
+    \item \textbf{Puncak Loyalitas:} Model ini memungkinkan kita melihat perjalanan pelanggan. Seorang pelanggan baru mencapai puncak probabilitas untuk berada di fase `Established` setelah 24 bulan, dan setelah itu probabilitas untuk berada di fase `Loyal` mulai meningkat secara signifikan.
+\end{itemize}
+
+\subsection{Kekuatan dan Keterbatasan Model}
+\subsubsection{Kekuatan}
+\begin{itemize}
+    \item \textbf{Granularitas Analisis:} 
+    Berbeda dengan model klasifikasi biner yang hanya menjawab "apakah" seorang pelanggan akan \textit{churn}, model DTMC ini memberikan pemahaman yang lebih dalam mengenai "kapan" \textit{churn} paling mungkin terjadi. Dengan membagi perjalanan pelanggan ke dalam fase `New`, `Established`, dan `Loyal`, model ini memudahkan identifikasi fase-fase di mana risiko \textit{churn} paling tinggi, sehingga memungkinkan strategi intervensi yang lebih tertarget dan presisi berdasarkan fase siklus hidup pelanggan.
+    
+    \item \textbf{Interpretasi Intuitif:} 
+    Salah satu kekuatan terbesar dari Rantai Markov adalah kemudahan interpretasinya. Setiap elemen $p_{ij}$ dalam matriks transisi memiliki makna bisnis yang langsung dapat dipahami sehingga jauh lebih mudah dikomunikasikan kepada para pemangku kepentingan, seperti manajer pemasaran atau direksi. Oleh karena itu, model ini membantu menghubungkan tim analisis data dengan pengambil keputusan secara lebih efektif.
+    
+    \item \textbf{Kuantifikasi Metrik:} 
+    Model DTMC ini berfungsi sebagai fondasi kuantitatif untuk menurunkan metrik-metrik bisnis yang lebih canggih. Secara spesifik, model ini menyediakan dua input yang krusial untuk perhitungan \textit{Customer Lifetime Value} (CLV) lebih lanjut yaitu probabilitas retensi pada setiap periode dan ekspektasi sisa masa hidup pelanggan dari setiap fase. Dengan informasi ini, perusahaan bisa menilai bahwa pelanggan yang `Loyal` bukan hanya bernilai tinggi karena pembelian mereka sekarang, tapi juga karena peluang mereka untuk terus bertahan ke depannya. Selain itu, teknik seperti Matriks Fundamental memungkinkan kita melihat rata-rata waktu yang dihabiskan pelanggan di tiap fase sebelum \textit{churn}.
+    
+\end{itemize}
+  
+\subsubsection{Keterbatasan}
+\begin{itemize}
+    \item \textbf{Asumsi Stasioneritas:} 
+    Model ini beroperasi di bawah asumsi fundamental bahwa probabilitas transisi antar status bersifat stasioner atau tidak berubah seiring berjalannya waktu. Asumsi ini membuat model jadi lebih sederhana, tapi mungkin kurang tepat untuk menggambarkan kondisi nyata di industri telekomunikasi yang cepat berubah. Misalnya, adanya promosi besar dari pesaing, teknologi baru seperti 5G, atau perubahan aturan pemerintah bisa mengubah cara pelanggan berperilaku, sehingga peluang transisinya juga berubah. Karena itu, model ini paling cocok digunakan saat kondisi pasar relatif stabil, namun akurasinya bisa menurun jika terjadi perubahan besar di luar dugaan.
+    \item \textbf{Inferensi dari Data Cross-Sectional:} 
+    Penelitian ini mengestimasi probabilitas transisi dari data \textit{snapshot} (cross-sectional) dengan menggunakan `tenure` sebagai proksi waktu. Pendekatan ini secara implisit mengasumsikan bahwa perilaku pelanggan yang saat ini memiliki \textit{tenure} $t$ bulan adalah representasi yang baik untuk perilaku pelanggan dengan \textit{tenure} $t-1$ bulan di periode berikutnya. Asumsi "kohort sintetis" ini mengabaikan kemungkinan adanya "efek kohort", di mana kelompok pelanggan yang mendaftar pada waktu yang berbeda (misalnya, saat ada promosi besar) mungkin memiliki karakteristik loyalitas yang berbeda. Untuk mendapatkan hasil yang lebih akurat, idealnya digunakan data panel (longitudinal) yang melacak pelanggan yang sama dari waktu ke waktu, sehingga transisi antar status bisa diamati secara langsung.
+    \item \textbf{Homogenitas dalam Grup:} 
+    Dengan mengelompokkan pelanggan hanya berdasarkan `tenure`, model ini secara tidak langsung mengasumsikan bahwa semua pelanggan dalam satu status memiliki karakteristik yang sama. Padahal, kenyataannya ada banyak perbedaan di dalam tiap kelompok. Sebagai contoh, seorang pelanggan `New` dengan kontrak dua tahun dan layanan premium (Fiber Optik, TV Streaming) memiliki profil risiko yang sangat berbeda dari pelanggan `New` lain dengan layanan biasa dan kontrak bulanan. Model ini "merata-ratakan" perilaku dari sub-segmen yang berbeda menjadi satu probabilitas transisi tunggal untuk setiap grup. Akibatnya, meskipun akurat secara agregat, model ini mungkin kurang presisi untuk memprediksi perilaku segmen pelanggan yang lebih spesifik.
+\end{itemize}
+
+\section{Kesimpulan}
+Penelitian ini membuktikan bahwa model Rantai Markov Waktu Diskrit (DTMC) dapat diadaptasi secara efektif untuk menganalisis tantangan bisnis nyata yang lebih kompleks seperti retensi pelanggan. Dengan membagi perjalanan pelanggan telekomunikasi ke dalam fase-fase siklus hidup, pendekatan ini memungkinkan analisis yang lebih mendalam, bukan hanya memprediksi kemungkinan pelanggan akan \textit{churn}, tetapi juga memperkirakan kapan dan dalam kondisi apa hal tersebut paling mungkin terjadi.
+
+\subsection*{Ringkasan Temuan Utama}
+Dari analisis yang telah dilakukan, beberapa temuan kunci berhasil diidentifikasi. Pertama, model DTMC 4-state secara efektif mengkuantifikasi bahwa risiko churn tidaklah seragam. Terbukti secara signifikan bahwa \textbf{pelanggan pada fase `New` (1-12 bulan) adalah yang paling rentan}, dengan probabilitas churn bulanan yang jauh melampaui pelanggan yang lebih tetap. Kedua, model ini berhasil memproyeksikan nasib sebuah kohort pelanggan baru dari waktu ke waktu, menunjukkan bahwa sebagian besar churn terjadi pada tahun-tahun awal, yang menggarisbawahi pentingnya kesan pertama dan pengalaman awal pelanggan. Temuan-temuan ini secara kolektif menegaskan bahwa pendekatan \textit{lifecycle} adalah kunci untuk membuka pemahaman yang lebih otentik tentang perilaku pelanggan.
+
+\subsection*{Implikasi Praktis dan Teoritis}
+Wawasan yang dihasilkan dari model ini membawa implikasi yang dapat ditindaklanjuti. Dari sisi praktis, perusahaan telekomunikasi dapat merancang \textbf{strategi retensi yang lebih cerdas dan tertarget}. Alih-alih menyebar diskon secara acak, perusahaan dapat mengalokasikan sumber daya secara intensif pada 6-12 bulan pertama masa berlangganan untuk membangun loyalitas sejak dini. Model ini juga dapat menjadi alat bantu untuk peramalan bisnis, dengan memberikan proyeksi jumlah pelanggan aktif di masa depan yang lebih akurat. Secara teoritis, proyek ini menjadi sebuah studi kasus yang solid tentang bagaimana pemilihan dan pendefinisian ruang keadaan (\textit{state space}) secara cermat dapat meningkatkan daya penjelasan sebuah model stokastik secara drastis.
+
+\subsection*{Saran dan Arah Penelitian Selanjutnya}
+Meskipun model ini memberikan hasil yang menjanjikan, masih terdapat ruang untuk pengembangan lebih lanjut. Beberapa saran yang dapat dipertimbangkan ke depannya antara lain:
+\begin{itemize}
+    \item \textbf{Memperkaya Definisi Status:} Penambahan variabel lain seperti jenis kontrak, layanan yang digunakan, atau perilaku penggunaan dapat menghasilkan segmentasi yang lebih granular—misalnya membedakan antara pelanggan New (Fiber) dan New (DSL).
+    \item \textbf{Menggunakan Model Stokastik Lanjutan:} Untuk menangkap dinamika yang lebih kompleks, penelitian di masa depan bisa mengeksplorasi Rantai Markov Waktu Kontinu (CTMC) untuk memodelkan \textit{churn} yang bisa terjadi kapan saja, tidak hanya di akhir bulan.
+    \item \textbf{Validasi dengan Data Panel:} Jika memungkinkan, menerapkan model ini pada data panel (longitudinal) akan memberikan validasi yang lebih kuat, karena memungkinkan pengamatan transisi pelanggan secara langsung alih-alih hanya mengandalkan estimasi dari data snapshot.
+\end{itemize}
+
+Penelitian ini menegaskan bahwa pendekatan kuantitatif berbasis DTMC dapat menjadi alat yang efektif dalam memahami pola retensi pelanggan secara sistematis. Dengan analisis yang tepat, model ini mampu menghasilkan wawasan yang relevan untuk mendukung pengambilan keputusan strategis berbasis data. Lampiran kode program dapat diakses melalui tautan berikut: \href{https://github.com/zakizulham/proyek-stokastik-churn-telekomunikasi}{https://github.com/zakizulham/proyek-stokastik-churn-telekomunikasi}.
+
+
+\newpage
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}
